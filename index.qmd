@@ -1,0 +1,396 @@
+---
+title: "The Rise of the 3 Pointer"
+theme: Flatly
+
+format:
+  closeread-html:
+    embed-resources: true
+    cr-style:
+      section-background-color: "#FFFFFF"
+      narrative-background-color-overlay: "#FFFFFF"
+      narrative-background-color-sidebar: "#FFFFFF"
+  html:
+    css: file.css
+---
+
+```{r message=FALSE}
+library(tidyverse)
+data3 <- read.csv("data3.csv")
+
+EVpts <- data.frame(Shot = c("Layups/Dunks
+(Restricted Area)", "Midrange
+(5–22 ft)","3-Point Range
+(22 ft+)"), ExpectedPoints = c(1.331, 0.857, 1.136), stringsAsFactors = FALSE)
+
+champions <- data.frame(year = c(2014, 2015, 2017, 2021), y = c(27.0, 31.2, 28.9, 39.4))
+champions_pct <- data.frame(year = c(2014, 2015, 2017, 2021), y = c(0.398, 0.416, 0.391, 0.364))
+
+champions$Legend <- "Championship"
+
+EVptsfake <- data.frame(Shot = c("Layups/Dunks
+(Restricted Area)", "Midrange
+(5–22 ft)","3-Point Range
+(22 ft+)"), ExpectedPoints = c(0, 0.857, 1.136), stringsAsFactors = FALSE)
+
+ranking <- data.frame(rank = c("30","29","28", "Average","3","2","1"), x3pm = c(14.0, 13.1, 13.0, 13.5, 17.8, 15.9, 14.5),  stringsAsFactors = FALSE)
+ranking$rank <- factor(ranking$rank, levels = c("30","29","28","Average","3","2","1"))
+
+celtics_champions <- data.frame(year = 2023, y = data3 %>% filter(year == 2023) %>% pull(C3PA))
+```
+
+:::::::::::::::::::: cr-section
+The NBA didn’t always love the 3-pointer. When it was introduced in 1979, it was seen as over the top, something for desperate moments or flashy players. Most teams barely used it, and coaches were hesitant to build any kind of offense around it. But something began to shift in the mid-2000s. @cr-intro
+
+::: {#cr-intro}
+![](intro.png){length="400"}
+:::
+
+First, teams like the Spurs and Rockets started experimenting. Then, the numbers caught up, as more threes were taken, shooting percentages didn’t drop but instead they improved. Analytics revealed what some had suspected, that 3s weren’t just exciting, they were efficient. Just because it’s a more difficult shot that doesn’t make it a worse shot. @cr-sticky-1
+
+::: {#cr-sticky}
+```{r}
+ggplot(data3, aes(x = year, y = X3PA)) +
+  geom_point(color = "black") +
+  labs(x="Year",y="3-Point Attempts", title = "League Average 3-Point Attempts Per Game") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_line(color = "black")
+
+```
+:::
+
+And by the 2010s, a revolution was in full swing. Today, teams aren’t just taking more 3s, they’re making more. The modern NBA isn’t about controlling the paint, it’s about stretching the floor. @cr-sticky
+
+::: {#cr-sticky-1}
+```{r}
+ggplot(data3, aes(x = year, y = X3PCT)) +
+  geom_point(color = "black") +
+  labs(x="Year",y="3-Point FG %", title = "League Average 3-Point FG %") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_line(color = "black")
+
+```
+
+Since 1995, players accuracy has somewhat plateauted at \~36%
+:::
+
+But wait - what about this sharp increase and decrease in shots attempted between the 1994 and 1996 seasons? @cr-sticky0
+
+::: {#cr-sticky0}
+```{r}
+ggplot(data3, aes(x = year, y = X3PA)) +
+  geom_point(color = "black") +
+  labs(x="Year",y="3-Point Attempts", title = "League Average 3-Point Attempts Per Game") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_line(color = "black")+
+  geom_point(data = subset(data3, year %in% c(1994, 1995, 1996)), aes(x = year, y = X3PA), color = "red")+
+  geom_line(data = subset(data3, year >= 1994 & year <= 1996), aes(x = year, y = X3PA), color = "red")
+```
+:::
+
+In the beginning of the 1994 season, the arc was shortened from 23 ft and 9 inches and 22 feet in the corners to 22 feet all around. This made the 3 pointer an overall slightly easier shot to make, driving up shot volume. However, beginning in the 1997 season, they reverted the 3 point line as while 3 point volume increased, overall scoring decreased \~5 points per game. @cr-sticky01
+
+::: {#cr-sticky01}
+```{r message=FALSE}
+ggplot(data3, aes(x = year, y = X3PA)) +
+  geom_point(color = "black") +
+  labs(x="Year",y="3-Point Attempts", title = "League Average 3-Point Attempts Per Game") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_line(color = "black")+
+  geom_point(data = subset(data3, year %in% c(1994, 1995, 1996)), aes(x = year, y = X3PA), color = "red")+
+  geom_line(data = subset(data3, year >= 1994 & year <= 1996), aes(x = year, y = X3PA), color = "red")+
+  coord_cartesian(xlim = c(1990, 2000)) +
+  scale_x_continuous(breaks = seq(1990, 2000, by = 2))
+```
+:::
+
+Lets go back a bit and see if there are any other trends @cr-sticky
+
+Right after 2010, the volume in 3 pointers rose sharply. @cr-sticky02
+
+::: {#cr-sticky02}
+```{r}
+ggplot(data3, aes(x = year, y = X3PA)) +
+  geom_point(color = "black") +
+  labs(x="Year",y="3-Point Attempts", title = "League Average 3-Point Attempts Per Game") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_line(color = "black")+
+  geom_point(data = subset(data3, year %in% c(2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020)), aes(x = year, y = X3PA), color = "red")+
+  geom_line(data = subset(data3, year >= 2010 & year <= 2020), aes(x = year, y = X3PA), color = "red")
+```
+:::
+
+Zooming in, we can see the sharp increase in 3 point volume across the league @cr-sticky03
+
+::: {#cr-sticky03}
+```{r message=FALSE}
+ggplot(data3, aes(x = year, y = X3PA)) +
+  geom_point(color = "black") +
+  labs(x="Year",y="3-Point Attempts", title = "League Average 3-Point Attempts Per Game") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_line(color = "black")+
+  geom_point(data = subset(data3, year %in% c(2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020)), aes(x = year, y = X3PA), color = "red")+
+  geom_line(data = subset(data3, year >= 2010 & year <= 2020), aes(x = year, y = X3PA), color = "red")+
+  coord_cartesian(xlim = c(2005,2024)) +
+  scale_x_continuous(breaks = seq(2005,2024, by = 4))
+```
+:::
+
+While the volume of 3 pointers shot has increased steadily since its inception, what might have caused this sharp increase in volume? Over the span of a decade, the average 3 point attempts doubled from 17 shots/game to almost 35.
+
+Lets go back to the 3pt attempts @cr-sticky2
+
+::: {#cr-sticky2}
+```{r}
+ggplot(data3, aes(x = year)) +
+  geom_point(aes(y = X3PA, color = "League Average")) +
+  geom_line(aes(y = X3PA, color= "League Average")) +
+  scale_color_manual(name = NULL, values = c("League Average" = "black")) +
+  labs(x="Year",y="3-Point Attempts (X3PA)", title = "Average 3-Point Attempts Per Game Over Time") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)
+
+```
+:::
+
+One team in particular, the golden state warriors shoots significantly more shots than the rest- No team embodied this transformation more completely than the Golden State Warriors. @cr-sticky3
+
+While other franchises tiptoed into the 3-point era, the Warriors dove in headfirst and Steph Curry led the way. @cr-sticky35
+
+Curry launched shots from 30, even 35 feet, and hit them with great accuracy. Defenders were pulled away from the paint, opening lanes, creating chaos. Alongside Klay Thompson, he formed one of the most lethal backcourts in league history. But it wasn’t just the shooting, it was the system.
+
+Golden State’s lineups broke the mold. With Draymond Green—a 6’7” power forward—playing center, the Warriors prioritized versatility over size, speed over power. Their “Death Lineup” became a cheat code: five players who could switch everything on defense and shoot from anywhere on offense.
+
+::: {#cr-sticky3}
+```{r}
+ggplot(data3, aes(x = year)) +
+  geom_point(aes(y = X3PA, color = "League Average")) +
+  geom_line(aes(y = X3PA, color= "League Average")) +
+  geom_point(aes(y = GSW3PA, color = "Golden State Warriors")) +
+  geom_line(aes(y = GSW3PA, color= "Golden State Warriors")) +
+  scale_color_manual(name = NULL, values = c("League Average" = "black","Golden State Warriors" = "lightblue")) +
+  labs(x="Year",y="3-Point Attempts (X3PA)", title = "Average 3-Point Attempts Per Game Over Time") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)
+```
+:::
+
+::: {#cr-sticky35}
+```{r}
+ggplot(data3, aes(x = year)) +
+  geom_point(aes(y = X3PA, color = "League Average")) +
+  geom_line(aes(y = X3PA, color= "League Average")) +
+  geom_point(aes(y = GSW3PA, color = "Golden State Warriors")) +
+  geom_line(aes(y = GSW3PA, color= "Golden State Warriors")) +
+  scale_color_manual(name = NULL, values = c("League Average" = "black","Golden State Warriors" = "lightblue")) +
+  labs(x="Year",y="3-Point Attempts (X3PA)", title = "Average 3-Point Attempts Per Game Over Time") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+   geom_point(data = subset(data3, year == 2009), aes(x = year, y = GSW3PA),
+    color = "red", size = 2, shape = 23, stroke = 0.8, fill = "red")
+```
+
+2009: Curry drafted
+:::
+
+They didn’t just win, they created a dynasty. Between 2015 and 2022, they claimed four championships and made six Finals appearances. They didn’t follow the trend. They set it. @cr-sticky31
+
+::: {#cr-sticky31}
+```{r}
+ggplot(data3, aes(x = year)) +
+  geom_point(aes(y = X3PA, color = "League Average")) +
+  geom_line(aes(y = X3PA, color= "League Average")) +
+  geom_point(aes(y = GSW3PA, color = "Golden State Warriors")) +
+  geom_line(aes(y = GSW3PA, color= "Golden State Warriors")) +
+  scale_color_manual(name = NULL, values = c("League Average" = "black","Golden State Warriors" = "lightblue")) +
+  labs(x="Year",y="3-Point Attempts (X3PA)", title = "Average 3-Point Attempts Per Game Over Time") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_text(data = champions, aes(x = year, y = y+2,label = "\U1F3C6"), color = "gold", size = 4, vjust = 0)
+```
+:::
+
+Their large volume of shots and elite accuracy propelled them to one of the best dynasties in recent years. @cr-sticky4
+
+::: {#cr-sticky4}
+```{r}
+ggplot(data3, aes(x = year)) +
+  geom_point(aes(y = X3PCT, color = "League Average")) +
+  geom_line(aes(y = X3PCT, color= "League Average")) +
+  geom_point(aes(y = GSW3pct, color = "Golden State Warriors")) +
+  geom_line(aes(y = GSW3pct, color= "Golden State Warriors")) +
+  scale_color_manual(name = NULL, values = c("League Average" = "black","Golden State Warriors" = "lightblue")) +
+  labs(x="Year",y="3 Point FG %", title = "Average 3-Point FG% Per Game Over Time") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_text(data = champions_pct, aes(x = year, y = y+0.01,label = "\U1F3C6"), color = "gold", size = 4, vjust = 0)
+
+```
+:::
+
+But why do 3 pointers and shooting more of them contribute to winning?
+
+::: {#cr-myplot}
+```{r}
+ggplot(EVptsfake, aes(x = Shot, y = ExpectedPoints)) +
+  geom_col(fill = "lightblue", width = 0.5, color = "black") +
+  labs(x = "Shot Ranges", y = "Expected Points Per Shot", title = "Expected Points Value Vs. Range")+
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_text(aes(label = sprintf("%.2f", ExpectedPoints)), vjust = -0.5)+
+  scale_y_continuous(limits = c(0, 1.5), expand = c(0, 0))
+```
+
+Expected points per shot is calculated from FG% x Point Value (ex: 0.36 \* 3)
+:::
+
+Scoring is only half the battle in the NBA. The real key to winning is efficiency. A good mid-range jumper hits around 40–45%. But a three-pointer made at just 35% yields more points per shot than either. That’s why the three-point shot has become the holy grail of modern offense: it maximizes output with fewer touches. As basketball players have become more accurate, the 3 point shot has gradually become more valuable per shot compared to the midrange. @cr-myplot
+
+::: {#cr-myplot1}
+```{r}
+ggplot(EVpts, aes(x = Shot, y = ExpectedPoints)) +
+  geom_col(fill = "lightblue", width = 0.5, color = "black") +
+  labs(x = "Shot Ranges", y = "Expected Points Per Shot", title = "Expected Points Value Vs. Range")+
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+  geom_text(aes(label = sprintf("%.2f", ExpectedPoints)), vjust = -0.5)+
+  scale_y_continuous(limits = c(0, 1.5), expand = c(0, 0))
+```
+
+Expected points per shot is calculated from FG% x Point Value (ex: 0.36 \* 3)
+:::
+
+But wait- what about layups and dunks, which score about 60-65% of the time? @cr-myplot1
+
+There’s more. NBA games are long—48 minutes of physicality. Driving into the lane ten times a game means absorbing ten collisions with some of the largest humans on earth. For shooters, pulling up from deep isn’t just smarter—it’s sustainable. Players preserve their legs, avoid wear and tear, and still generate elite offense.
+
+It’s not just about avoiding contact—it’s about embracing efficiency. Then comes the question: if layups are more efficient than threes, why don’t teams just take more layups?
+
+On paper, the layup is the highest-percentage shot in basketball. But the paper doesn’t have a 7-foot rim protector with a 7’4” wingspan waiting underneath it. The modern NBA is a defensive chessboard, and teams are trained to collapse the paint the moment a drive begins. Help defenders rotate. Big men contest. Guards dig down. @cr-defense
+
+Now imagine you’re a 6’3” point guard trying to finish over a 7-footer with a 30-inch vertical. That’s not an efficient shot. Meanwhile, taking a three from 28 feet might give you a clean look, no help, no traffic, and no bruises. Steph Curry pulling from deep isn’t a gimmick, it’s a calculation. And it’s one more and more teams are willing to make.
+
+::: {#cr-defense}
+![](ex1defense.png){width="600"}
+:::
+
+The data backs it up: teams that shoot more threes while shooting them well win more games. It’s not about aesthetics. It’s about results. @cr-ranks
+
+::: {#cr-ranks}
+```{r}
+ggplot(ranking, aes(x = rank, y = x3pm)) +
+  geom_col(fill = "skyblue", width = 0.5, color = "black") +
+  labs(x = "Team Rank by Wins in Regular Season", y = "3-pointers Made per Game",title = "3PM vs. Team finishing (2024-2025)") +
+  theme_minimal(base_size = 14)+
+  theme_bw()+
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5), 
+        axis.text.x = element_text(size = 10), 
+        axis.text.y = element_text(size = 12), 
+        axis.title.x = element_text(size = 15), 
+        axis.title.y = element_text(size = 15),
+        aspect.ratio = 0.7)+
+   scale_y_continuous(limits = c(0, 20), expand = c(0, 0))
+```
+:::
+
+So who might become the next golden state? @cr-sticky2
+
+One team in particular has been shooting and making more threes than the rest, recently breaking both the 3 pointers attempted and made records in a single season. @cr-celtic
+
+While they're about as accurate as the league average, the Celtics are shooting about 10.6 more threes than the league average 3 point shots/game, which means they are also making significantly more 3 pointers. While no play style or team is invincible or guaranteed to win the championship, its clear that Boston's strategy to shoot more threes is paying off, as they were the reigning NBA champions, and also just finished 2nd in the East.
+
+If they keep up the volume and accuracy, they will likely remain top contenders
+
+::: {#cr-celtic}
+```{r}
+ggplot(data3, aes(x = year)) +
+  geom_point(aes(y = X3PA, color = "League Average")) +
+  geom_line(aes(y  = X3PA, color = "League Average")) +
+  geom_point(aes(y = C3PA, color = "Boston Celtics")) +
+  geom_line(aes(y  = C3PA, color = "Boston Celtics")) +
+  scale_color_manual(name = NULL,values = c("League Average" = "black", "Boston Celtics" = "#007A33")) +
+  labs(x = "Year", y  = "3-Point Attempts (X3PA)", title = "Average 3-Point Attempts Per Game Over Time") +
+  theme_bw() +
+  theme( plot.title    = element_text(size = 16, face = "bold", hjust = 0.5),axis.text.x   = element_text(size = 12),axis.text.y   = element_text(size = 12), axis.title.x  = element_text(size = 15),axis.title.y  = element_text(size = 15),aspect.ratio  = 0.7 ) +
+  geom_text(data = celtics_champions, aes(x = year, y = y + 2, label = "\U1F3C6"),color = "gold",size = 4,vjust = 0)+
+  coord_cartesian(xlim = c(2010,2024))
+```
+:::
+
+Some fans say the rise of the three-point shot has made the game less fun, too many pull-ups, not enough post play. But from a strategic standpoint, the numbers don’t lie. The three-point shot isn’t just a trend. It’s a winning formula. In today’s NBA, range equals results and those who shoot wisely rise to the top.
+
+Project by Ryan Tu and Tyler Gant
+
+Sources:\
+<https://www.theunion.com/sports/lamarrs-sports-takes-five-of-the-best-three-point-shooters-in-the-1980s/article_6c610246-76d7-11ef-bf30-cb590a6990b3.html> <https://www.sbnation.com/nba/2017/3/6/14823068/2017-nba-scores-steph-curry-gobert-ulis-westbrook> <https://hoopstudent.com/basketball-defense/> <https://www.basketball-reference.com/> <https://www.nba.com/stats/players/shooting>
+::::::::::::::::::::
